@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { getStore } from "@/demo/store";
 import { useStore } from "./useStore";
+import { StatusBadge, TypeIcon } from "./bits";
 import { Library } from "./Library";
 import { AssetDetail } from "./AssetDetail";
 import { Review } from "./Review";
@@ -65,17 +66,20 @@ function Shell() {
             browser. Search it, review it, diff it, and watch an agent work it.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setSelected(null);
-            setTab("activity");
-            setAutoReplay(true);
-          }}
-          className="pill-primary"
-        >
-          ▶ Watch an agent use Cairn
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <GlobalSearch onOpen={open} />
+          <button
+            type="button"
+            onClick={() => {
+              setSelected(null);
+              setTab("activity");
+              setAutoReplay(true);
+            }}
+            className="pill-primary"
+          >
+            ▶ Watch an agent use Cairn
+          </button>
+        </div>
       </div>
 
       <nav className="mt-8 flex gap-1 border-b border-line" aria-label="Demo sections">
@@ -142,6 +146,88 @@ function Shell() {
           </Link>
         </p>
       </div>
+    </div>
+  );
+}
+
+/* Persistent search with live results, mirroring the product's global header
+   search. "/" focuses it from anywhere in the demo. */
+function GlobalSearch({ onOpen }: { onOpen: (id: string) => void }) {
+  const store = useStore();
+  const [q, setQ] = useState("");
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = document.activeElement;
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || (el as HTMLElement)?.isContentEditable) return;
+      e.preventDefault();
+      inputRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const results = useMemo(
+    () => (q.trim() ? store.search(q, { includeArchived: true }, "human:you", { record: false }).slice(0, 6) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- store contents only change via pick/reset
+    [q],
+  );
+
+  const pick = (id: string) => {
+    store.search(q, { includeArchived: true }, "human:you"); // record it, like the real query log
+    setQ("");
+    inputRef.current?.blur();
+    onOpen(id);
+  };
+
+  return (
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="search"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setTimeout(() => setFocused(false), 150)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && results[0]) pick(results[0].id);
+          if (e.key === "Escape") inputRef.current?.blur();
+        }}
+        placeholder="Search your library…"
+        aria-label="Search your library"
+        className="h-10 w-56 rounded-full border border-line bg-raised px-4 pr-8 text-sm outline-none transition-colors placeholder:text-faint focus:w-72 focus:border-hairline sm:w-64"
+      />
+      <kbd className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 rounded border border-line px-1.5 font-mono text-[10px] text-faint">
+        /
+      </kbd>
+
+      {focused && q.trim() && (
+        <div className="absolute left-0 top-full z-30 mt-1.5 w-80 overflow-hidden rounded-lg border border-line bg-raised shadow-2xl">
+          {results.length === 0 ? (
+            <p className="px-4 py-3 text-sm text-faint">No matches for “{q.trim()}”.</p>
+          ) : (
+            <ul>
+              {results.map((a) => (
+                <li key={a.id}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => pick(a.id)}
+                    className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-sunken"
+                  >
+                    <TypeIcon type={a.type} />
+                    <span className="min-w-0 flex-1 truncate text-sm">{a.title}</span>
+                    <StatusBadge status={a.status} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }

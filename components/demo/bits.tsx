@@ -23,12 +23,27 @@ export function StatusBadge({ status }: { status: Status }) {
 }
 
 export function TypeIcon({ type }: { type: AssetType }) {
+  const hue = `var(--type-${type})`;
   return (
     <span
-      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-sunken font-mono text-[11px] text-muted"
+      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-semibold"
+      style={{ background: `color-mix(in oklab, ${hue} 14%, transparent)`, color: hue }}
       title={type}
     >
       {TYPE_ICONS[type]}
+    </span>
+  );
+}
+
+/** Tile + label, for contexts where the glyph alone is too subtle. */
+export function TypeBadge({ type }: { type: AssetType }) {
+  const hue = `var(--type-${type})`;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide"
+      style={{ background: `color-mix(in oklab, ${hue} 12%, transparent)`, color: hue }}
+    >
+      {TYPE_ICONS[type]} {type}
     </span>
   );
 }

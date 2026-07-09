@@ -29,6 +29,18 @@
   --chart-1: #b4632c;
   --chart-2: #0d8259;
   --chart-3: #1863dc;
+  /* status + type identity hues, mirrored from the product tokens.css */
+  --slate: #75758a;
+  --status-draft: var(--amber);
+  --status-review: var(--copper);
+  --status-approved: var(--green);
+  --status-archived: var(--slate);
+  --type-document: #1863dc;
+  --type-code: #7a5ccc;
+  --type-image: #c04b78;
+  --type-dataset: #0e7d90;
+  --type-prompt: #b4632c;
+  --type-decision: #17171c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -57,6 +69,13 @@
     --chart-1: #cd7f47;
     --chart-2: #3fa88b;
     --chart-3: #6a92e8;
+    --slate: #8b8ba0;
+    --type-document: #6f96ec;
+    --type-code: #a08ae0;
+    --type-image: #d97a9e;
+    --type-dataset: #4aa8b8;
+    --type-prompt: #cd7f47;
+    --type-decision: #e8e8ec;
   }
 }
 
