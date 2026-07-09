@@ -18,9 +18,13 @@ export function OpenApp({ className = "pill-primary" }: { className?: string }) 
     if (probing) return;
     setProbing(true);
     try {
+      // targetAddressSpace opts into Chrome's Local Network Access flow: the
+      // browser shows a one-time permission prompt before allowing a public
+      // site to reach loopback.
       const res = await fetch(site.healthEndpoint, {
-        signal: AbortSignal.timeout(1200),
-      });
+        signal: AbortSignal.timeout(2500),
+        targetAddressSpace: "loopback",
+      } as RequestInit);
       const body = (await res.json()) as { ok?: boolean };
       if (body.ok) {
         window.location.href = site.localApp;
