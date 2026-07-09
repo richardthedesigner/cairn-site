@@ -16,12 +16,11 @@ const KIND_META: Record<EventKind, { icon: string; label: string }> = {
   "status.changed": { icon: "✓", label: "status changed" },
 };
 
+/* Render with key={text} so a new line starts from a fresh mount. */
 function TypeLine({ text, speed = 14, onDone }: { text: string; speed?: number; onDone?: () => void }) {
   const [n, setN] = useState(0);
   const done = useRef(false);
   useEffect(() => {
-    setN(0);
-    done.current = false;
     const step = Math.max(1, Math.ceil(text.length / 60)); // cap total duration
     const t = setInterval(() => {
       setN((prev) => {
@@ -101,6 +100,7 @@ function ReplayConsole({ onDone }: { onDone: () => void }) {
             <p className="text-[#eeece7]">
               <span className="text-[#ffad9b]">tool</span>{" "}
               <TypeLine
+                key={`${i}-${p.frame.tool}`}
                 text={`${p.frame.tool}(${JSON.stringify(p.frame.args)})`}
                 onDone={i === played.length - 1 && !p.result ? runCurrent : undefined}
               />
@@ -110,7 +110,7 @@ function ReplayConsole({ onDone }: { onDone: () => void }) {
                 <p className={`mt-1 ${p.result.ok ? "text-[#7fc8ad]" : "text-[#e6a23c]"}`}>
                   {p.result.ok ? "✓" : "✗"} {p.result.result}
                 </p>
-                <p className="mt-1 text-[#93939f]">// {p.frame.narration}</p>
+                <p className="mt-1 text-[#93939f]">{`// ${p.frame.narration}`}</p>
               </>
             )}
           </div>

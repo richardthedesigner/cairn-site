@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { getStore } from "@/demo/store";
 import { useStore } from "./useStore";
 import { Library } from "./Library";
@@ -146,10 +146,16 @@ function Shell() {
   );
 }
 
+const emptySubscribe = () => () => {};
+
 export function DemoApp() {
-  // the store reads localStorage + Date.now(); render client-side only
-  const [ready, setReady] = useState(false);
-  useEffect(() => setReady(true), []);
+  // the store reads localStorage + Date.now(); render client-side only.
+  // useSyncExternalStore is the lint-clean hydration gate.
+  const ready = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   if (!ready) {
     return (
       <div className="mx-auto w-full max-w-6xl flex-1 px-5 pb-20" aria-busy>

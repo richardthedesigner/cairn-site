@@ -16,11 +16,12 @@ export function Library({ onOpen }: { onOpen: (id: string) => void }) {
 
   const collections = store.collections();
   const filters = { type, status, collection, includeArchived: status === "archived" };
+  const stamp = store.snapshot(); // changes on every mutation; keeps the memo honest
 
   const rows = useMemo(
     () => (q.trim() ? store.search(q, filters, "human:you", { record: false }) : store.listAssets(filters)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- snapshot subscription drives re-render
-    [q, type, status, collection, store.snapshot()],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- filters is rebuilt per render
+    [q, type, status, collection, stamp],
   );
 
   // record settled searches as events (like the real FTS layer's query log)
