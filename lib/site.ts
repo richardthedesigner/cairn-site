@@ -3,7 +3,7 @@ export const site = {
   tagline: "Your AI makes great work. Cairn keeps it.",
   description:
     "Cairn is the system of record for AI-generated work: everything your AI makes, findable, versioned, and ready for its next session.",
-  url: "https://cairn-site.vercel.app",
+  url: "https://cairn-site-sigma.vercel.app",
   github: "https://github.com/richardthedesigner/cairn-site",
   productRepo: "https://github.com/richardthedesigner/damllm",
   localApp: "http://localhost:4800",
